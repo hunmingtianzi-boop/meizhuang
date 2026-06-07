@@ -1,4 +1,4 @@
-import { Camera, ImagePlus, RotateCcw, UploadCloud } from "lucide-react";
+import { Camera, Eye, EyeOff, ImagePlus, KeyRound, RotateCcw, UploadCloud } from "lucide-react";
 import { useRef, useState } from "react";
 import { fileToUploadedImage, urlToUploadedImage } from "../lib/analyze.js";
 import { SAMPLE_FACE_IMAGE } from "../data/sampleImages.js";
@@ -8,7 +8,17 @@ import { BackButton, PrimaryButton, SecondaryButton } from "./Layout.jsx";
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_SIZE = 5 * 1024 * 1024;
 
-export function UploadStep({ uploadedImage, onImageChange, onAnalyze, onBack, apiStatus, modelConfig, onModelConfigChange }) {
+export function UploadStep({
+  uploadedImage,
+  onImageChange,
+  onAnalyze,
+  onBack,
+  apiStatus,
+  modelConfig,
+  onModelConfigChange,
+  userApiKey,
+  onUserApiKeyChange,
+}) {
   const inputRef = useRef(null);
   const [localError, setLocalError] = useState("");
   const [dragging, setDragging] = useState(false);
@@ -108,8 +118,14 @@ export function UploadStep({ uploadedImage, onImageChange, onAnalyze, onBack, ap
 
       <aside className="rounded-[16px] border border-[#E8E3DC] bg-white p-6 shadow-soft">
         <h3 className="font-serifTitle text-2xl text-[#2D5A4B]">拍摄建议</h3>
-        <ModelSelector modelConfig={modelConfig} onChange={onModelConfigChange} apiStatus={apiStatus} />
-        <ApiStatus status={apiStatus} modelConfig={modelConfig} />
+        <ModelSelector
+          modelConfig={modelConfig}
+          onChange={onModelConfigChange}
+          apiStatus={apiStatus}
+          userApiKey={userApiKey}
+          onUserApiKeyChange={onUserApiKeyChange}
+        />
+        <ApiStatus status={apiStatus} modelConfig={modelConfig} userApiKey={userApiKey} />
         <div className="mt-5 grid gap-3 text-sm text-[#2C2C2C]">
           {["正脸面对镜头，尽量露出额头和脸颊", "自然光或均匀室内光，避免强逆光", "单人照片，避免滤镜、厚重妆容和遮挡", "支持 JPEG、PNG、WEBP，最大 5MB"].map((item) => (
             <div key={item} className="rounded-2xl bg-[#FAF8F5] px-4 py-3">
@@ -125,9 +141,10 @@ export function UploadStep({ uploadedImage, onImageChange, onAnalyze, onBack, ap
   );
 }
 
-function ModelSelector({ modelConfig, onChange, apiStatus }) {
+function ModelSelector({ modelConfig, onChange, apiStatus, userApiKey, onUserApiKeyChange }) {
   const provider = getProvider(modelConfig?.provider);
   const selectedProviderStatus = apiStatus?.providers?.[provider.id];
+  const [showKey, setShowKey] = useState(false);
 
   return (
     <div className="mt-5 rounded-[16px] border border-[#E8E3DC] bg-[#FAF8F5] p-4">
@@ -164,22 +181,53 @@ function ModelSelector({ modelConfig, onChange, apiStatus }) {
             ))}
           </select>
         </label>
+        <label className="grid gap-1 text-xs font-medium text-[#7A7A7A]">
+          <span className="inline-flex items-center gap-1">
+            <KeyRound size={13} />
+            自带 API Key
+          </span>
+          <div className="flex min-h-11 overflow-hidden rounded-2xl border border-[#E8E3DC] bg-white focus-within:border-[#B8945A]">
+            <input
+              value={userApiKey}
+              onChange={(event) => onUserApiKeyChange(event.target.value)}
+              type={showKey ? "text" : "password"}
+              autoComplete="off"
+              placeholder="可选；留空则使用平台环境变量"
+              className="min-w-0 flex-1 bg-transparent px-3 text-sm font-medium text-[#2C2C2C] outline-none"
+            />
+            <button
+              type="button"
+              onClick={() => setShowKey((value) => !value)}
+              className="flex w-11 items-center justify-center text-[#7A7A7A] transition hover:text-[#2D5A4B]"
+              aria-label={showKey ? "隐藏 API Key" : "显示 API Key"}
+            >
+              {showKey ? <EyeOff size={17} /> : <Eye size={17} />}
+            </button>
+          </div>
+        </label>
       </div>
-      {selectedProviderStatus?.hasKey === false ? (
+      <p className="mt-3 text-xs leading-5 text-[#7A7A7A]">
+        API Key 只保存在当前页面内存中，用于本次分析请求；刷新页面后会清空。
+      </p>
+      {!userApiKey && selectedProviderStatus?.hasKey === false ? (
         <p className="mt-3 text-xs leading-5 text-[#8C4B18]">当前供应商没有配置 API Key，分析会转为演示兜底。</p>
       ) : null}
     </div>
   );
 }
 
-function ApiStatus({ status, modelConfig }) {
+function ApiStatus({ status, modelConfig, userApiKey }) {
   let text = "正在检查真实模型连接状态...";
   let classes = "bg-[#EAF2EF] text-[#2D5A4B]";
 
   if (status) {
     const selectedProvider = modelConfig?.provider || status.provider;
     const selectedStatus = status.providers?.[selectedProvider] || status;
-    if (!selectedStatus.hasKey) {
+    if (userApiKey) {
+      const providerLabel = getProvider(selectedProvider).label;
+      text = `将使用你输入的 API Key 调用：${providerLabel} / ${modelConfig?.model || selectedStatus.defaultModel || status.model}`;
+      classes = "bg-[#EAF2EF] text-[#2D5A4B]";
+    } else if (!selectedStatus.hasKey) {
       text = "当前供应商未配置 API Key：分析会使用演示兜底报告。";
       classes = "bg-[#E8914A]/10 text-[#8C4B18]";
     } else if (!selectedStatus.keyFormatOk) {

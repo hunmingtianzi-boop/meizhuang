@@ -51,32 +51,38 @@ function buildProviderConfig(selection = {}, keys = {}) {
   const explicitOpenAIKey = keys.explicitOpenAIKey ?? process.env.OPENAI_API_KEY ?? "";
   const legacyKey = keys.legacyKey ?? process.env.ANTHROPIC_API_KEY ?? "";
   const requestedProvider = selection.provider;
+  const userApiKey = String(selection.apiKey || "").trim();
 
   if (requestedProvider === "alibaba" || (!requestedProvider && dashScopeKey)) {
+    const key = userApiKey || dashScopeKey;
     return {
       provider: "alibaba",
-      key: dashScopeKey,
+      key,
       model: selection.model || process.env.ALIBABA_MODEL || "qwen-vl-plus",
-      keyFormatOk: dashScopeKey.startsWith("sk-"),
+      keyFormatOk: key.startsWith("sk-"),
+      usingUserKey: Boolean(userApiKey),
     };
   }
 
   if (requestedProvider === "anthropic" || (!requestedProvider && legacyKey.startsWith("sk-ant-"))) {
+    const key = userApiKey || legacyKey;
     return {
       provider: "anthropic",
-      key: legacyKey,
+      key,
       model: selection.model || process.env.ANTHROPIC_MODEL || "claude-sonnet-4-20250514",
-      keyFormatOk: legacyKey.startsWith("sk-ant-"),
+      keyFormatOk: key.startsWith("sk-ant-"),
+      usingUserKey: Boolean(userApiKey),
     };
   }
 
-  const openAIKey = explicitOpenAIKey || (legacyKey.startsWith("sk-") ? legacyKey : "");
+  const openAIKey = userApiKey || explicitOpenAIKey || (legacyKey.startsWith("sk-") ? legacyKey : "");
   if (requestedProvider === "openai" || (!requestedProvider && openAIKey)) {
     return {
       provider: "openai",
       key: openAIKey,
       model: selection.model || process.env.OPENAI_MODEL || "gpt-4.1-mini",
       keyFormatOk: openAIKey.startsWith("sk-"),
+      usingUserKey: Boolean(userApiKey),
     };
   }
 
@@ -85,6 +91,7 @@ function buildProviderConfig(selection = {}, keys = {}) {
     key: "",
     model: "",
     keyFormatOk: false,
+    usingUserKey: false,
   };
 }
 

@@ -28,6 +28,7 @@ export function App() {
   const [usedRecommendationFallback, setUsedRecommendationFallback] = useState(false);
   const [apiStatus, setApiStatus] = useState(null);
   const [modelConfig, setModelConfig] = useState({ provider: "alibaba", model: "qwen-vl-plus" });
+  const [userApiKeys, setUserApiKeys] = useState({});
   const [error, setError] = useState(null);
 
   const products = useMemo(() => productDatabase, []);
@@ -56,7 +57,10 @@ export function App() {
     setError(null);
     setStep("analyzing");
     const minimumLoading = delay(6200);
-    const result = await analyzeSkin(uploadedImage, userProfile, modelConfig);
+    const result = await analyzeSkin(uploadedImage, userProfile, {
+      ...modelConfig,
+      apiKey: userApiKeys[modelConfig.provider] || "",
+    });
     await minimumLoading;
 
     if (result.analysis.isValidFace === false) {
@@ -109,6 +113,13 @@ export function App() {
               provider: provider.id,
               model: nextConfig.model || provider.models[0].id,
             });
+          }}
+          userApiKey={userApiKeys[modelConfig.provider] || ""}
+          onUserApiKeyChange={(apiKey) => {
+            setUserApiKeys((current) => ({
+              ...current,
+              [modelConfig.provider]: apiKey,
+            }));
           }}
         />
       ) : null}

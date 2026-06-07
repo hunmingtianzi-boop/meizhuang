@@ -19,6 +19,7 @@ short_description: AI 肌肤图像分析与个性化护肤品推荐应用
 - 用户画像：肤质、年龄、预算、过敏史。
 - 图片上传：点击上传、拖拽上传、JPG/PNG/WEBP 校验、5MB 限制、预览、内置测试图片。
 - AI 分析：默认走 `/api/analyze` 后端代理。阿里百炼使用 DashScope OpenAI 兼容接口；OpenAI key 使用 OpenAI Responses API 视觉输入；Anthropic `sk-ant-` key 仍兼容 Anthropic Messages API。
+- 用户可在上传页临时输入自己的 API Key；Key 只保存在当前页面内存中，不写入本地存储，刷新后清空。
 - 演示稳定性：没有 API Key、网络异常或 API 返回异常时，自动启用本地兜底分析，保证流程可完整演示。
 - 商品推荐：解析 `jd_skincare_products(1).json` 的 297 条商品，做标签映射、预算过滤、肤质加分、过敏扣分、品类去重和 Top 8 排序。
 - 加分项：过敏警告、成分冲突 Banner、早晚护肤流程自动填入推荐商品。
