@@ -1,0 +1,12 @@
+node_modules
+dist
+.git
+.env
+*.log
+.playwright-mcp
+mobile-recommendation.png
+skin(2).zip
+skin(2)/__MACOSX
+skin(2)/._*
+prod-server.*
+dev-server.*

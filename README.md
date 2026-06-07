@@ -1,3 +1,15 @@
+---
+title: AI 肌肤分析与护肤推荐助手
+sdk: docker
+app_file: Dockerfile
+emoji: 💆
+colorFrom: green
+colorTo: yellow
+pinned: false
+license: apache-2.0
+short_description: AI 肌肤图像分析与个性化护肤品推荐应用
+---
+
 # AI 肌肤分析与护肤推荐助手
 
 一个面向 AI 创业营编程挑战赛的 React/Vite 满分取向作品。核心流程覆盖用户画像、图片上传、AI 肌肤分析、报告展示、商品匹配、成分冲突提醒和早晚护肤方案。
@@ -43,12 +55,11 @@ VITE_ANTHROPIC_API_KEY=your_browser_available_key
 
 ## ModelScope Studio 部署
 
-1. 在 ModelScope 创建 Studio，参考 [Creating and Building Studios](https://www.modelscope.cn/docs/studios/create)。
-2. 将本项目文件上传到 Studio 仓库。
-3. 在环境变量中配置 `DASHSCOPE_API_KEY`，可选配置 `ALIBABA_MODEL`，默认 `qwen-vl-plus`。
-4. 构建命令使用 `npm install && npm run build`。
-5. 启动命令使用 `npm start`。
-6. 在 Studio 设置页手动启动部署。
+1. 在 ModelScope 创建 Studio，SDK 选择 `Docker`，参考 [Creating and Building Studios](https://www.modelscope.cn/docs/studios/create)。
+2. Docker 创空间需要阿里云账号绑定与实名认证；服务端口必须为 `7860`。
+3. 将本项目文件上传到 Studio 仓库。
+4. 在环境变量中配置 `DASHSCOPE_API_KEY`，可选配置 `ALIBABA_MODEL`，默认 `qwen-vl-plus`。
+5. 在 Studio 设置页点击 Launch/Publish Now 手动启动部署。
 
 API 相关说明可参考 [API 推理介绍](https://modelscope.cn/docs/model-service/API-Inference/intro)。
 

@@ -6,7 +6,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const app = express();
-const port = Number(process.env.PORT || 8787);
+const port = Number(process.env.PORT || 7860);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, "..");
 const distDir = path.join(rootDir, "dist");
@@ -300,6 +300,6 @@ if (fs.existsSync(distDir)) {
   });
 }
 
-app.listen(port, () => {
+app.listen(port, "0.0.0.0", () => {
   console.info(`API proxy listening on http://localhost:${port}`);
 });
